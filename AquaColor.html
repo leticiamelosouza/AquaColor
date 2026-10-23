@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#090d16" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>AquaColor Pro - Turbidity & True Color</title>
+  
+  <style>
+    /* ==========================================================================
+       AquaColor Pro - Global Variables & Styles
+       ========================================================================== */
+    :root {
+      /* System Color Palette */
+      --bg-dark: #090d16;
+      --surface-dark: #111827;
+      --surface-card: #131d2e;
+      --surface-hover: #1e293b;
+      --border-dark: #27354a;
+      
+      /* Typography and Texts */
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      /* Accent Colors */
+      --cyan-main: #06b6d4;
+      --cyan-hover: #0891b2;
+      --cyan-light: #22d3ee;
+      --cyan-glow: rgba(6, 182, 212, 0.25);
+      --emerald-main: #10b981;
+      --rose-main: #f43f5e;
+      
+      /* Fonts */
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    /* Basic Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    .app-container {
+      max-width: 680px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       Top Bar Header
+       ========================================================================== */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(9, 13, 22, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-dark);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .btn-icon {
+      background: #1e293b;
+      border: 1px solid var(--border-dark);
+      color: var(--text-muted);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon:hover, .btn-icon:active {
+      background: var(--surface-hover);
+      color: var(--text-main);
+      transform: scale(0.95);
+    }
+
+    /* ==========================================================================
+       Main Content & Cards
+       ========================================================================== */
+    .main-content {
+      flex: 1;
+      padding: 16px 16px 120px 16px;
+    }
+
+    .tab-view {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .tab-view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-dark);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ==========================================================================
+       Buttons & Controls
+       ========================================================================== */
+    .analyte-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .analyte-btn {
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border-dark);
+      background: #0f172a;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .analyte-btn.active {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: var(--cyan-main);
+      color: var(--cyan-light);
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    .btn {
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border-dark);
+      background: #1e293b;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--cyan-main);
+      border-color: var(--cyan-hover);
+      color: #04121e;
+      font-weight: 700;
+    }
+
+    .btn-primary:hover {
+      background: var(--cyan-light);
+    }
+
+    .btn-upload {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(14, 165, 233, 0.2) 100%);
+      border: 1.5px dashed var(--cyan-main);
+      color: var(--cyan-light);
+      padding: 14px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-upload:hover {
+      background: rgba(6, 182, 212, 0.25);
+    }
+
+    /* ==========================================================================
+       Canvas & Optical Processing
+       ========================================================================== */
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      height: 290px;
+      background: #05080f;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      border: 1px solid var(--border-dark);
+      touch-action: none;
+      user-select: none;
+    }
+
+    #mainCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #000;
+    }
+
+    .roi-svg-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* ROI Controls */
+    .roi-panel {
+      background: #0b1322;
+      border: 1px solid #1e293b;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .roi-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .roi-shapes {
+      display: flex;
+      gap: 8px;
+    }
+
+    .roi-shape-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-dark);
+      background: #1e293b;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .roi-shape-btn.active {
+      background: var(--cyan-main);
+      color: #04121e;
+      border-color: var(--cyan-main);
+      font-weight: 700;
+    }
+
+    .range-slider {
+      flex: 1;
+      accent-color: var(--cyan-main);
+    }
+
+    /* Optical Readouts */
+    .readout-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .metric-card {
+      background: #090d16;
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 1.15rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--cyan-light);
+    }
+
+    /* ==========================================================================
+       Result Hero Box
+       ========================================================================== */
+    .result-hero {
+      background: linear-gradient(135deg, #0e1e38 0%, #081426 100%);
+      border: 1.5px solid var(--cyan-main);
+      border-radius: 18px;
+      padding: 20px 16px;
+      text-align: center;
+      margin-top: 16px;
+      box-shadow: 0 8px 24px rgba(6, 182, 212, 0.15);
+    }
+
+    .result-val {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: #ffffff;
+      font-family: var(--font-mono);
+      line-height: 1.1;
+      margin: 8px 0;
+    }
+
+    .result-unit {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--cyan-light);
+    }
+
+    .compliance-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      margin-top: 12px;
+    }
+
+    .compliance-ok {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .compliance-warn {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    /* ==========================================================================
+       Calibration Tables & Lists
+       ========================================================================== */
+    .calib-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+    }
+
+    .calib-table th {
+      background: #090d16;
+      color: var(--text-dim);
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    .calib-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .calib-table input {
+      width: 65px;
+      background: #090d16;
+      border: 1px solid var(--border-dark);
+      color: #fff;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    .calib-table input:focus {
+      outline: none;
+      border-color: var(--cyan-main);
+    }
+
+    /* History */
+    .history-item {
+      background: #0f172a;
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-dim);
+      padding: 32px 16px;
+      font-size: 0.9rem;
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 12px;
+      border: 1px dashed var(--border-dark);
+    }
+
+    /* ==========================================================================
+       Bottom Navigation
+       ========================================================================== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: rgba(9, 13, 22, 0.96);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-dark);
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      padding-top: 10px;
+      padding-bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      flex: 1;
+      padding: 6px;
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--cyan-light);
+      font-weight: 700;
+    }
+
+    .nav-item.active .nav-icon-box {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 12px;
+      transform: translateY(-2px);
+    }
+
+    .nav-icon-box {
+      width: 36px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+      transition: all 0.2s;
+    }
+
+    .nav-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ==========================================================================
+       Standards & Credits
+       ========================================================================== */
+    .standard-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid #1e293b;
+      font-size: 0.85rem;
+    }
+    
+    .standard-row:last-child {
+      border-bottom: none;
+    }
+
+    .dev-credit-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .dev-credit-text {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    .dev-credit-highlight {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    /* Utility Classes */
+    .text-cyan { color: var(--cyan-light); }
+    .text-emerald { color: var(--emerald-main); }
+    .font-mono { font-family: var(--font-mono); }
+    .font-bold { font-weight: 700; }
+    .text-xs { font-size: 0.75rem; }
+    .text-sm { font-size: 0.85rem; }
+    .mt-2 { margin-top: 8px; }
+    .mt-3 { margin-top: 12px; }
+    .w-full { width: 100%; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Header -->
+    <header class="top-bar">
+      <div class="brand-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2.5">
+          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+        </svg>
+        <span>AquaColor <span class="text-cyan">Pro</span></span>
+      </div>
+      <button class="btn-icon" id="quickSampleBtn" title="Reset Reticle Position">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- ==========================================
+           TAB 1: MEASURE
+           ========================================== -->
+      <section id="tab-measure" class="tab-view active">
+        
+        <!-- Analyte Selector -->
+        <div class="analyte-toggle">
+          <button class="analyte-btn active" id="btnAnalyteTurbidity">Turbidity (NTU)</button>
+          <button class="analyte-btn" id="btnAnalyteColor">True Color (Pt-Co)</button>
+        </div>
+
+        <!-- Optical Area and Upload -->
+        <div class="card" style="padding: 14px;">
+          <label class="btn-upload" title="Upload an image sample">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <span>Upload Photo / Sample</span>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;" />
+          </label>
+
+          <div class="canvas-container" id="canvasContainer">
+            <canvas id="mainCanvas"></canvas>
+            <svg class="roi-svg-overlay" id="roiOverlay"></svg>
+          </div>
+
+          <!-- Reticle (ROI) Controls -->
+          <div class="roi-panel">
+            <div class="roi-row">
+              <span class="text-xs font-mono text-cyan">ROI Shape & Area:</span>
+              <div class="roi-shapes">
+                <button class="roi-shape-btn active" id="shapeCircle">Circle</button>
+                <button class="roi-shape-btn" id="shapeSquare">Square</button>
+                <button class="roi-shape-btn" id="shapeRect">Rectangle</button>
+              </div>
+            </div>
+            <div class="roi-row">
+              <span class="text-xs" id="roiDimensionLabel">Size: 120px</span>
+              <input type="range" class="range-slider" id="roiSizeSlider" min="30" max="300" value="120" />
+            </div>
+          </div>
+
+          <!-- Real-Time Pixel Readouts -->
+          <div class="readout-grid">
+            <div class="metric-card">
+              <div class="metric-label">Grayscale (G)</div>
+              <div class="metric-value" id="valGray">0.00</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Blue Channel (B)</div>
+              <div class="metric-value" id="valBlue">0.00</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Pixels Sampled</div>
+              <div class="metric-value text-sm font-mono" id="valPixels" style="margin-top: 4px;">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Final Result Panel -->
+        <div class="result-hero">
+          <div class="text-xs font-mono text-cyan font-bold" id="resultAnalyteLabel">TURBIDITY QUANTIFICATION</div>
+          <div class="result-val" id="resultValue">--</div>
+          <div class="result-unit" id="resultUnit">Nephelometric Turbidity Units (NTU)</div>
+          
+          <div style="margin: 12px auto; padding: 6px 12px; background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.25); border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
+            <span class="text-xs font-mono text-cyan font-bold" id="measureCalibEquation">Eq: Y = 0.455X + 12.4</span>
+            <span class="text-xs font-mono text-emerald font-bold" id="measureCalibR2">R² = 0.9982</span>
+          </div>
+
+          <div>
+            <span class="compliance-pill compliance-ok" id="complianceBadge">
+              Drinking Water Standard Met (≤ 5.0 NTU)
+            </span>
+          </div>
+          
+          <button class="btn btn-primary w-full mt-3" id="btnSaveRecord">
+            Save Measurement to History
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ==========================================
+           TAB 2: CALIBRATION
+           ========================================== -->
+      <section id="tab-calibration" class="tab-view">
+        <div class="card">
+          <div class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+            5-Point Calibration Curve
+          </div>
+          
+          <div class="analyte-toggle">
+            <button class="analyte-btn active" id="btnCalibTurbidity">Turbidity</button>
+            <button class="analyte-btn" id="btnCalibColor">True Color</button>
+          </div>
+
+          <div style="background: #090d16; border-radius: 12px; padding: 10px; margin-bottom: 12px; border: 1px solid var(--border-dark);">
+            <canvas id="calibChartCanvas" width="400" height="180" style="width: 100%; height: 180px; display: block;"></canvas>
+          </div>
+
+          <div class="flex-between text-xs font-mono mb-2" style="background: #0b1322; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-dark);">
+            <span class="text-cyan font-bold" id="calibEquation">Eq: Y = 0.455X + 12.4</span>
+            <span class="text-emerald font-bold" id="calibR2">R² = 0.9982</span>
+          </div>
+
+          <table class="calib-table mt-2">
+            <thead>
+              <tr>
+                <th>Standard</th>
+                <th>Target Conc.</th>
+                <th>Optical Signal</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="calibTableBody">
+              <!-- Dynamically generated -->
+            </tbody>
+          </table>
+
+          <button class="btn w-full mt-3" id="btnResetFactoryCalib">
+            Reset to Factory Calibrations
+          </button>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 3: HISTORY
+           ========================================== -->
+      <section id="tab-history" class="tab-view">
+        <div class="card">
+          <div class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Measurement Log
+          </div>
+          <div id="historyList">
+            <!-- Generated via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 4: STANDARDS
+           ========================================== -->
+      <section id="tab-standards" class="tab-view">
+        <div class="card">
+          <div class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Water Quality Standards
+          </div>
+
+          <div class="standard-row">
+            <div>
+              <div class="font-bold text-white">Drinking Water Potability (EPA / WHO)</div>
+              <div class="text-xs text-muted">Treated water for human consumption</div>
+            </div>
+            <div class="text-right font-mono text-cyan">
+              <div>Turbidity: ≤ 5.0 NTU</div>
+              <div>Color: ≤ 15 Pt-Co</div>
+            </div>
+          </div>
+
+          <div class="standard-row">
+            <div>
+              <div class="font-bold text-white">Fresh Water Class 1</div>
+              <div class="text-xs text-muted">Preservation and aquatic protection</div>
+            </div>
+            <div class="text-right font-mono text-cyan">
+              <div>Turbidity: ≤ 40 NTU</div>
+              <div>Color: ≤ 20 mg Pt/L</div>
+            </div>
+          </div>
+
+          <div class="standard-row">
+            <div>
+              <div class="font-bold text-white">Conventional Supply Water (Class 2/3)</div>
+              <div class="text-xs text-muted">Conventional treatment required</div>
+            </div>
+            <div class="text-right font-mono text-cyan">
+              <div>Turbidity: ≤ 100 NTU</div>
+              <div>Color: ≤ 75 mg Pt/L</div>
+            </div>
+          </div>
+
+          <!-- Developer Credits -->
+          <div class="dev-credit-card">
+            <p class="dev-credit-text">
+              Application developed by <span class="dev-credit-highlight">Jackson Rodrigo dos Santos Silva</span>, researcher (UFPE) – Laboratory of Instrumentation and Automation in Analytical Chemistry (LIA3).
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="tab-measure">
+        <div class="nav-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        </div>
+        <span class="nav-label">Measure</span>
+      </button>
+
+      <button class="nav-item" data-tab="tab-calibration">
+        <div class="nav-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-6 6"/></svg>
+        </div>
+        <span class="nav-label">Calibration</span>
+      </button>
+
+      <button class="nav-item" data-tab="tab-history">
+        <div class="nav-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <span class="nav-label">History</span>
+      </button>
+
+      <button class="nav-item" data-tab="tab-standards">
+        <div class="nav-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+        </div>
+        <span class="nav-label">Standards</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      /* ==========================================================================
+         1. App Settings and Initial State
+         ========================================================================== */
+      
+      // Default Factory Calibration Curves
+      const factoryCalib = {
+        turbidity: {
+          slopeA: 0.455, interceptB: 12.4, r2: 0.9982,
+          standards: [
+            { concentration: 10, signal: 16.95 },
+            { concentration: 50, signal: 35.15 },
+            { concentration: 100, signal: 57.90 },
+            { concentration: 250, signal: 126.15 },
+            { concentration: 500, signal: 239.90 }
+          ]
+        },
+        color: {
+          slopeA: 0.380, interceptB: 18.2, r2: 0.9975,
+          standards: [
+            { concentration: 10, signal: 22.0 },
+            { concentration: 50, signal: 37.2 },
+            { concentration: 100, signal: 56.2 },
+            { concentration: 250, signal: 113.2 },
+            { concentration: 500, signal: 208.2 }
+          ]
+        }
+      };
+
+      // Global state managing app data
+      const state = {
+        analyte: 'turbidity', // 'turbidity' | 'color'
+        roi: {
+          shape: 'circle',
+          diameter: 120, squareSize: 120, width: 180, height: 100,
+          x: 0.5, y: 0.5 // Relative center position (0.0 to 1.0)
+        },
+        readout: { gray: 0, blue: 0, pixels: 0 },
+        calib: JSON.parse(JSON.stringify(factoryCalib)),
+        history: JSON.parse(localStorage.getItem('aquacolor_history') || '[]'),
+        loadedImage: null 
+      };
+
+      // Retrieve saved calibrations from the browser
+      try {
+        const savedCalib = localStorage.getItem('aquacolor_calib');
+        if (savedCalib) {
+          const parsed = JSON.parse(savedCalib);
+          if (parsed.turbidity && parsed.color) state.calib = parsed;
+        }
+      } catch(e) { console.error("Error loading calibration", e); }
+
+      /* ==========================================================================
+         2. Mathematical Logic - Linear Regression
+         ========================================================================== */
+      function computeLinearRegression(analyteKey) {
+        const model = state.calib[analyteKey];
+        const pts = model.standards.filter(s => !isNaN(s.concentration) && !isNaN(s.signal));
+        const n = pts.length;
+        if (n < 2) return;
+
+        let sumX = 0, sumY = 0;
+        pts.forEach(p => { sumX += p.concentration; sumY += p.signal; });
+        const meanX = sumX / n;
+        const meanY = sumY / n;
+
+        let num = 0, den = 0;
+        pts.forEach(p => {
+          num += (p.concentration - meanX) * (p.signal - meanY);
+          den += (p.concentration - meanX) ** 2;
+        });
+
+        const slopeA = den !== 0 ? (num / den) : 0;
+        const interceptB = meanY - slopeA * meanX;
+
+        let ssTot = 0, ssRes = 0;
+        pts.forEach(p => {
+          const yPred = slopeA * p.concentration + interceptB;
+          ssTot += (p.signal - meanY) ** 2;
+          ssRes += (p.signal - yPred) ** 2;
+        });
+
+        model.slopeA = slopeA;
+        model.interceptB = interceptB;
+        model.r2 = ssTot > 0 ? Math.max(0, Math.min(1, 1 - (ssRes / ssTot))) : 1;
+
+        localStorage.setItem('aquacolor_calib', JSON.stringify(state.calib));
+        updateMeasureCalibDisplay();
+      }
+
+      computeLinearRegression('turbidity');
+      computeLinearRegression('color');
+
+      /* ==========================================================================
+         3. Image Processing and Canvas
+         ========================================================================== */
+      const canvas = document.getElementById('mainCanvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const roiOverlay = document.getElementById('roiOverlay');
+      const canvasContainer = document.getElementById('canvasContainer');
+
+      function redrawCanvas() {
+        const rect = canvasContainer.getBoundingClientRect();
+        const displayW = Math.round(rect.width || 400);
+        const displayH = Math.round(rect.height || 290);
+
+        if (canvas.width !== displayW || canvas.height !== displayH) {
+          canvas.width = displayW;
+          canvas.height = displayH;
+        }
+
+        if (state.loadedImage) {
+          // Render the image covering the area while preserving aspect ratio
+          const img = state.loadedImage;
+          const hRatio = canvas.width / img.width;
+          const vRatio = canvas.height / img.height;
+          const ratio = Math.max(hRatio, vRatio);
+          const centerShiftX = (canvas.width - img.width * ratio) / 2;
+          const centerShiftY = (canvas.height - img.height * ratio) / 2;
+          
+          ctx.fillStyle = '#05080f';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+        } else {
+          // Elegant placeholder background if no image is loaded
+          const w = canvas.width, h = canvas.height;
+          const bgGrad = ctx.createLinearGradient(0, 0, w, h);
+          if (state.analyte === 'turbidity') {
+            bgGrad.addColorStop(0, '#101726'); bgGrad.addColorStop(1, '#1e293b');
+          } else {
+            bgGrad.addColorStop(0, '#1e140a'); bgGrad.addColorStop(1, '#2c1e11');
+          }
+          ctx.fillStyle = bgGrad;
+          ctx.fillRect(0, 0, w, h);
+
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+          ctx.font = '13px -apple-system, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('Tap "Upload Photo" to start', w / 2, h / 2 - 10);
+          
+          ctx.fillStyle = 'rgba(6, 182, 212, 0.7)';
+          ctx.font = '11px monospace';
+          ctx.fillText('Move the reticle over the liquid to analyze', w / 2, h / 2 + 14);
+        }
+        processOpticalSample();
+      }
+
+      function processOpticalSample() {
+        if (!canvas.width || !canvas.height) return;
+        
+        const w = canvas.width, h = canvas.height;
+        const cx = Math.floor(state.roi.x * w);
+        const cy = Math.floor(state.roi.y * h);
+
+        let halfW = state.roi.diameter / 2;
+        let halfH = state.roi.diameter / 2;
+        
+        if (state.roi.shape === 'square') {
+          halfW = state.roi.squareSize / 2; halfH = halfW;
+        } else if (state.roi.shape === 'rectangle') {
+          halfW = state.roi.width / 2; halfH = state.roi.height / 2;
+        }
+
+        const startX = Math.max(0, Math.round(cx - halfW));
+        const startY = Math.max(0, Math.round(cy - halfH));
+        const endX = Math.min(w - 1, Math.round(cx + halfW));
+        const endY = Math.min(h - 1, Math.round(cy + halfH));
+        const boxW = Math.max(1, endX - startX + 1);
+        const boxH = Math.max(1, endY - startY + 1);
+
+        try {
+          const imgData = ctx.getImageData(startX, startY, boxW, boxH);
+          const data = imgData.data;
+          let sumR = 0, sumG = 0, sumB = 0, count = 0;
+          const radX = halfW, radY = halfH;
+
+          for (let y = 0; y < boxH; y++) {
+            const dy = (startY + y) - cy;
+            for (let x = 0; x < boxW; x++) {
+              const dx = (startX + x) - cx;
+              if (state.roi.shape === 'circle' && (dx**2)/(radX**2) + (dy**2)/(radY**2) > 1.0) continue;
+
+              const idx = (y * boxW + x) * 4;
+              sumR += data[idx];
+              sumG += data[idx + 1];
+              sumB += data[idx + 2];
+              count++;
+            }
+          }
+
+          if (count > 0) {
+            const avgR = sumR / count, avgG = sumG / count, avgB = sumB / count;
+            const gray = 0.299 * avgR + 0.587 * avgG + 0.114 * avgB;
+
+            state.readout.gray = gray;
+            state.readout.blue = avgB;
+            state.readout.pixels = count;
+
+            document.getElementById('valGray').innerText = gray.toFixed(2);
+            document.getElementById('valBlue').innerText = avgB.toFixed(2);
+            document.getElementById('valPixels').innerText = count.toLocaleString('en-US');
+
+            computeAnalyticalResult();
+          }
+        } catch(e) {} // Silences CORS errors when running locally without a server
+
+        drawRoiOverlay();
+      }
+
+      function drawRoiOverlay() {
+        const cx = state.roi.x * 100;
+        const cy = state.roi.y * 100;
+        let shapeSvg = '';
+
+        if (state.roi.shape === 'circle') {
+          const r = state.roi.diameter / 2;
+          shapeSvg = `
+            <circle cx="0" cy="0" r="${r}" fill="rgba(6, 182, 212, 0.15)" stroke="#22d3ee" stroke-width="2" />
+            <circle cx="0" cy="0" r="${r - 3}" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="3 3" />
+            <line x1="${-r - 5}" y1="0" x2="${-r + 5}" y2="0" stroke="#22d3ee" stroke-width="2" />
+            <line x1="${r - 5}" y1="0" x2="${r + 5}" y2="0" stroke="#22d3ee" stroke-width="2" />
+            <line x1="0" y1="${-r - 5}" x2="0" y2="${-r + 5}" stroke="#22d3ee" stroke-width="2" />
+            <line x1="0" y1="${r - 5}" x2="0" y2="${r + 5}" stroke="#22d3ee" stroke-width="2" />
+          `;
+        } else {
+          const w = state.roi.shape === 'square' ? state.roi.squareSize : state.roi.width;
+          const h = state.roi.shape === 'square' ? state.roi.squareSize : state.roi.height;
+          shapeSvg = `
+            <rect x="${-w/2}" y="${-h/2}" width="${w}" height="${h}" rx="6" fill="rgba(6, 182, 212, 0.15)" stroke="#22d3ee" stroke-width="2" />
+            <rect x="${-w/2 + 3}" y="${-h/2 + 3}" width="${w - 6}" height="${h - 6}" rx="4" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="3 3" />
+          `;
+        }
+
+        roiOverlay.innerHTML = `
+          <g style="transform: translate(${cx}%, ${cy}%);">
+            ${shapeSvg}
+            <line x1="-10" y1="0" x2="-2" y2="0" stroke="#22d3ee" stroke-width="1.5" />
+            <line x1="2" y1="0" x2="10" y2="0" stroke="#22d3ee" stroke-width="1.5" />
+            <line x1="0" y1="-10" x2="0" y2="-2" stroke="#22d3ee" stroke-width="1.5" />
+            <line x1="0" y1="2" x2="0" y2="10" stroke="#22d3ee" stroke-width="1.5" />
+            <circle cx="0" cy="0" r="1.5" fill="#22d3ee" />
+          </g>
+        `;
+      }
+
+      /* ==========================================================================
+         4. UI Updates and Results
+         ========================================================================== */
+      function updateMeasureCalibDisplay() {
+        const model = state.calib[state.analyte];
+        if (!model) return;
+        const signStr = model.interceptB >= 0 ? `+ ${model.interceptB.toFixed(2)}` : `- ${Math.abs(model.interceptB).toFixed(2)}`;
+        
+        const eqEl = document.getElementById('measureCalibEquation');
+        const r2El = document.getElementById('measureCalibR2');
+        if (eqEl) eqEl.innerText = `Eq: Y = ${model.slopeA.toFixed(3)}X ${signStr}`;
+        if (r2El) r2El.innerText = `R² = ${model.r2.toFixed(4)}`;
+      }
+
+      function computeAnalyticalResult() {
+        const model = state.calib[state.analyte];
+        const signal = state.analyte === 'turbidity' ? state.readout.gray : state.readout.blue;
+
+        // Inverse Calculation: Concentration = (Signal - Intercept) / Slope
+        let conc = 0;
+        if (model.slopeA !== 0) conc = (signal - model.interceptB) / model.slopeA;
+        conc = Math.max(0, Math.min(999, conc));
+
+        document.getElementById('resultValue').innerText = conc.toFixed(1);
+        updateMeasureCalibDisplay();
+
+        const badge = document.getElementById('complianceBadge');
+        if (state.analyte === 'turbidity') {
+          document.getElementById('resultAnalyteLabel').innerText = 'TURBIDITY QUANTIFICATION';
+          document.getElementById('resultUnit').innerText = 'Nephelometric Turbidity Units (NTU)';
+          if (conc <= 5.0) {
+            badge.className = 'compliance-pill compliance-ok';
+            badge.innerText = 'Drinking Water Standard Met (≤ 5.0 NTU)';
+          } else {
+            badge.className = 'compliance-pill compliance-warn';
+            badge.innerText = 'Warning: Above Potability Limit (> 5.0 NTU)';
+          }
+        } else {
+          document.getElementById('resultAnalyteLabel').innerText = 'TRUE COLOR QUANTIFICATION';
+          document.getElementById('resultUnit').innerText = 'Pt-Co / Color Units';
+          if (conc <= 15.0) {
+            badge.className = 'compliance-pill compliance-ok';
+            badge.innerText = 'Drinking Water Standard Met (≤ 15 Pt-Co)';
+          } else {
+            badge.className = 'compliance-pill compliance-warn';
+            badge.innerText = 'Warning: Above Potability Limit (> 15 Pt-Co)';
+          }
+        }
+      }
+
+      // Render History
+      function renderHistoryView() {
+        const container = document.getElementById('historyList');
+        if (!state.history.length) {
+          container.innerHTML = '<div class="empty-state">No measurements saved yet.<br>How about doing your first analysis?</div>';
+          return;
+        }
+        container.innerHTML = state.history.map(item => `
+          <div class="history-item">
+            <div>
+              <div class="font-bold text-white">${item.analyte === 'turbidity' ? 'Turbidity' : 'True Color'}</div>
+              <div class="text-xs text-muted font-mono">${item.timestamp}</div>
+            </div>
+            <div class="text-right">
+              <div class="font-mono text-cyan font-bold" style="font-size: 1.1rem;">${item.value.toFixed(1)} ${item.unit}</div>
+              <div class="text-xs font-mono text-dim">Signal: ${item.signal.toFixed(2)}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render Calibration and Chart
+      let calibAnalyte = 'turbidity';
+      function renderCalibrationView() {
+        computeLinearRegression(calibAnalyte);
+        const model = state.calib[calibAnalyte];
+        const signStr = model.interceptB >= 0 ? `+ ${model.interceptB.toFixed(1)}` : `- ${Math.abs(model.interceptB).toFixed(1)}`;
+        
+        document.getElementById('calibEquation').innerText = `Eq: Y = ${model.slopeA.toFixed(3)}X ${signStr}`;
+        document.getElementById('calibR2').innerText = `R² = ${model.r2.toFixed(4)}`;
+
+        const tbody = document.getElementById('calibTableBody');
+        tbody.innerHTML = model.standards.map((std, idx) => `
+          <tr>
+            <td>#${idx + 1}</td>
+            <td><input type="number" step="any" value="${std.concentration}" oninput="window.updateCalibConc('${calibAnalyte}', ${idx}, this.value)" /></td>
+            <td><input type="number" step="any" value="${std.signal}" oninput="window.updateCalibSignal('${calibAnalyte}', ${idx}, this.value)" /></td>
+            <td><button class="btn" style="padding: 4px 8px; font-size: 0.75rem;" onclick="window.sampleCurrentSignalToCalib('${calibAnalyte}', ${idx})">Read Signal</button></td>
+          </tr>
+        `).join('');
+
+        drawCalibChart(model);
+      }
+
+      function drawCalibChart(model) {
+        const c = document.getElementById('calibChartCanvas');
+        const cx = c.getContext('2d');
+        cx.clearRect(0, 0, c.width, c.height);
+
+        const maxConc = 500, maxSig = 255;
+        const padL = 40, padR = 20, padT = 15, padB = 30;
+        const plotW = c.width - padL - padR, plotH = c.height - padT - padB;
+
+        // Axes
+        cx.strokeStyle = '#334155'; cx.lineWidth = 1;
+        cx.beginPath();
+        cx.moveTo(padL, padT); cx.lineTo(padL, c.height - padB); cx.lineTo(c.width - padR, c.height - padB);
+        cx.stroke();
+
+        // Labels
+        cx.fillStyle = '#64748b'; cx.font = '10px monospace';
+        cx.textAlign = 'center';
+        cx.fillText('0', padL, c.height - padB + 14);
+        cx.fillText('250', padL + plotW / 2, c.height - padB + 14);
+        cx.fillText('500 Conc.', c.width - padR, c.height - padB + 14);
+        cx.textAlign = 'right';
+        cx.fillText('0', padL - 6, c.height - padB + 4);
+        cx.fillText('255', padL - 6, padT + 8);
+
+        // Trendline
+        cx.strokeStyle = '#06b6d4'; cx.lineWidth = 2;
+        cx.beginPath();
+        const yStart = model.slopeA * 0 + model.interceptB;
+        const yEnd = model.slopeA * maxConc + model.interceptB;
+        const pyStart = (c.height - padB) - (Math.max(0, Math.min(maxSig, yStart)) / maxSig) * plotH;
+        const pyEnd = (c.height - padB) - (Math.max(0, Math.min(maxSig, yEnd)) / maxSig) * plotH;
+        cx.moveTo(padL, pyStart); cx.lineTo(padL + plotW, pyEnd);
+        cx.stroke();
+
+        // Scatter Points
+        model.standards.forEach(std => {
+          const px = padL + (std.concentration / maxConc) * plotW;
+          const py = (c.height - padB) - (std.signal / maxSig) * plotH;
+          
+          cx.fillStyle = 'rgba(6, 182, 212, 0.3)';
+          cx.beginPath(); cx.arc(px, py, 7, 0, Math.PI * 2); cx.fill();
+
+          cx.fillStyle = '#22d3ee';
+          cx.beginPath(); cx.arc(px, py, 3.5, 0, Math.PI * 2); cx.fill();
+        });
+      }
+
+      /* ==========================================================================
+         5. Listeners and Global Events
+         ========================================================================== */
+      
+      // Reticle Control (Mouse and Touch)
+      let isDragging = false;
+      function handlePointer(e) {
+        const rect = canvasContainer.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        state.roi.x = Math.max(0.05, Math.min(0.95, (clientX - rect.left) / rect.width));
+        state.roi.y = Math.max(0.05, Math.min(0.95, (clientY - rect.top) / rect.height));
+        processOpticalSample();
+      }
+
+      canvasContainer.addEventListener('mousedown', e => { isDragging = true; handlePointer(e); });
+      window.addEventListener('mousemove', e => { if (isDragging) handlePointer(e); });
+      window.addEventListener('mouseup', () => isDragging = false);
+
+      canvasContainer.addEventListener('touchstart', e => { isDragging = true; handlePointer(e); }, { passive: false });
+      window.addEventListener('touchmove', e => { if (isDragging) { e.preventDefault(); handlePointer(e); } }, { passive: false });
+      window.addEventListener('touchend', () => isDragging = false);
+
+      // Reset Button
+      document.getElementById('quickSampleBtn').addEventListener('click', () => {
+        state.roi.x = 0.5; state.roi.y = 0.5; processOpticalSample();
+      });
+
+      // Tab Navigation
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const target = btn.getAttribute('data-tab');
+          document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+          document.getElementById(target).classList.add('active');
+
+          if (target === 'tab-measure') redrawCanvas();
+          if (target === 'tab-calibration') renderCalibrationView();
+          if (target === 'tab-history') renderHistoryView();
+        });
+      });
+
+      // Analyte Switch
+      document.getElementById('btnAnalyteTurbidity').addEventListener('click', function() {
+        state.analyte = 'turbidity';
+        this.classList.add('active'); document.getElementById('btnAnalyteColor').classList.remove('active');
+        updateMeasureCalibDisplay(); redrawCanvas();
+      });
+
+      document.getElementById('btnAnalyteColor').addEventListener('click', function() {
+        state.analyte = 'color';
+        this.classList.add('active'); document.getElementById('btnAnalyteTurbidity').classList.remove('active');
+        updateMeasureCalibDisplay(); redrawCanvas();
+      });
+
+      // Reticle Shape Controls
+      function updateShapeUi(name, val) {
+        document.querySelectorAll('.roi-shape-btn').forEach(b => b.classList.remove('active'));
+        if (state.roi.shape === 'circle') document.getElementById('shapeCircle').classList.add('active');
+        if (state.roi.shape === 'square') document.getElementById('shapeSquare').classList.add('active');
+        if (state.roi.shape === 'rectangle') document.getElementById('shapeRect').classList.add('active');
+        document.getElementById('roiDimensionLabel').innerText = `Size: ${val}px`;
+        document.getElementById('roiSizeSlider').value = val;
+        processOpticalSample();
+      }
+
+      document.getElementById('shapeCircle').addEventListener('click', () => { state.roi.shape = 'circle'; updateShapeUi('Circle', state.roi.diameter); });
+      document.getElementById('shapeSquare').addEventListener('click', () => { state.roi.shape = 'square'; updateShapeUi('Square', state.roi.squareSize); });
+      document.getElementById('shapeRect').addEventListener('click', () => { state.roi.shape = 'rectangle'; updateShapeUi('Rectangle', state.roi.width); });
+
+      document.getElementById('roiSizeSlider').addEventListener('input', e => {
+        const val = parseInt(e.target.value, 10);
+        if (state.roi.shape === 'circle') state.roi.diameter = val;
+        else if (state.roi.shape === 'square') state.roi.squareSize = val;
+        else { state.roi.width = val; state.roi.height = Math.round(val * 0.6); }
+        document.getElementById('roiDimensionLabel').innerText = `Size: ${val}px`;
+        processOpticalSample();
+      });
+
+      // Image Upload
+      document.getElementById('fileInput').addEventListener('change', e => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = evt => {
+          const img = new Image();
+          img.onload = () => { state.loadedImage = img; redrawCanvas(); };
+          img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Save History
+      document.getElementById('btnSaveRecord').addEventListener('click', () => {
+        const val = document.getElementById('resultValue').innerText;
+        if (val === '--') return;
+        const record = {
+          id: Date.now().toString(),
+          timestamp: new Date().toLocaleString('en-US'),
+          analyte: state.analyte,
+          value: parseFloat(val),
+          unit: state.analyte === 'turbidity' ? 'NTU' : 'Pt-Co',
+          signal: state.analyte === 'turbidity' ? state.readout.gray : state.readout.blue
+        };
+        state.history.unshift(record);
+        localStorage.setItem('aquacolor_history', JSON.stringify(state.history));
+        alert('Measurement successfully saved to history!');
+      });
+
+      // Global Calibration Functions (Injected into window for inline HTML access)
+      window.updateCalibConc = (analyte, idx, val) => {
+        state.calib[analyte].standards[idx].concentration = isNaN(parseFloat(val)) ? 0 : parseFloat(val);
+        computeLinearRegression(analyte); renderCalibrationView();
+      };
+      
+      window.updateCalibSignal = (analyte, idx, val) => {
+        state.calib[analyte].standards[idx].signal = isNaN(parseFloat(val)) ? 0 : parseFloat(val);
+        computeLinearRegression(analyte); renderCalibrationView();
+      };
+      
+      window.sampleCurrentSignalToCalib = (analyte, idx) => {
+        const sig = analyte === 'turbidity' ? state.readout.gray : state.readout.blue;
+        state.calib[analyte].standards[idx].signal = parseFloat(sig.toFixed(2));
+        computeLinearRegression(analyte); renderCalibrationView();
+        alert(`Optical signal ${sig.toFixed(2)} captured for Standard #${idx + 1}!`);
+      };
+
+      document.getElementById('btnCalibTurbidity').addEventListener('click', function() {
+        calibAnalyte = 'turbidity';
+        this.classList.add('active'); document.getElementById('btnCalibColor').classList.remove('active');
+        renderCalibrationView();
+      });
+
+      document.getElementById('btnCalibColor').addEventListener('click', function() {
+        calibAnalyte = 'color';
+        this.classList.add('active'); document.getElementById('btnCalibTurbidity').classList.remove('active');
+        renderCalibrationView();
+      });
+
+      document.getElementById('btnResetFactoryCalib').addEventListener('click', () => {
+        if (confirm('Do you want to restore all calibration curves to factory defaults?')) {
+          state.calib = JSON.parse(JSON.stringify(factoryCalib));
+          computeLinearRegression('turbidity'); computeLinearRegression('color');
+          renderCalibrationView(); updateMeasureCalibDisplay();
+        }
+      });
+
+      // Screen Initialization
+      updateMeasureCalibDisplay();
+      window.addEventListener('resize', redrawCanvas);
+      setTimeout(redrawCanvas, 50);
+
+    })();
+  </script>
+</body>
+</html>
